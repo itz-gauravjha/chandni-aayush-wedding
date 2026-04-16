@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chandni & Aayush - Wedding Invitation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --maroon-dark: #1a0505;
+            --maroon: #8b0000;
+            --maroon-light: #a52a2a;
+            --gold: #d4af37;
+            --gold-light: #f4e4bc;
+            --gold-dark: #b8941f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--maroon-dark);
+            overflow-x: hidden;
+            color: white;
+        }
+
+        /* Three.js Canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Loader */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d0a0a 0%, #1a0505 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-ganesh {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #d4af37 0%, #b8941f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            animation: loaderPulse 2s infinite;
+            box-shadow: 0 0 60px rgba(212,175,55,0.6);
+        }
+
+        @keyframes loaderPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(212,175,55,0.6); }
+            50% { transform: scale(1.1); box-shadow: 0 0 100px rgba(212,175,55,0.9); }
+        }
+
+        .loader-text {
+            margin-top: 30px;
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 18px;
+            letter-spacing: 4px;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Main Content */
+        .content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(139, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 30px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        /* Swastika Animation */
+        .swastika-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+        }
+
+        .swastika {
+            width: 100%;
+            height: 100%;
+            animation: rotateSwastika 10s linear infinite;
+        }
+
+        @keyframes rotateSwastika {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Ganesh Circle */
+        .ganesh-circle {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle at 30% 30%, #d4af37, #b8941f);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 20px 60px rgba(212,175,55,0.4);
+        }
+
+        .ganesh-circle::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 3px dashed rgba(212,175,55,0.5);
+            border-radius: 50%;
+            animation: spin 20s linear infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Title Styles */
+        .title-font {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        .cinzel {
+            font-family: 'Cinzel', serif;
+        }
+
+        .devanagari {
+            font-family: 'Noto Serif Devanagari', serif;
+        }
+
+        /* Gold Gradient Text */
+        .gold-text {
+            background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Flower Decorations */
+        .flower {
+            position: absolute;
+            font-size: 40px;
+            opacity: 0.6;
+            animation: flowerFloat 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes flowerFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+            50% { transform: translateY(-20px) rotate(10deg); opacity: 0.8; }
+        }
+
+        /* Event Card Hover */
+        .event-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(212,175,55,0.2);
+        }
+
+        /* Pulse Animation for Wedding Day */
+        .pulse-gold {
+            animation: pulseGold 2s infinite;
+        }
+
+        @keyframes pulseGold {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(212,175,55,0); }
+        }
+
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Diya Animation */
+        .diya {
+            animation: diyaFlicker 3s infinite alternate;
+        }
+
+        @keyframes diyaFlicker {
+            0% { filter: brightness(1) drop-shadow(0 0 10px #ff6b35); }
+            100% { filter: brightness(1.2) drop-shadow(0 0 20px #ff6b35); }
+        }
+
+        /* Border Animation */
+        .animated-border {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animated-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            animation: borderSlide 3s infinite;
+        }
+
+        @keyframes borderSlide {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .ganesh-circle {
+                width: 120px;
+                height: 120px;
+                font-size: 50px;
+            }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <!-- Three.js Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-ganesh">🕉️</div>
+        <div class="loader-text">Loading Blessings...</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content min-h-screen py-8 px-4">
+        <div class="max-w-4xl mx-auto">
+
+            <!-- Main Card -->
+            <div class="glass-card p-6 md:p-12 relative overflow-hidden">
+
+                <!-- Floating Flowers -->
+                <div class="flower" style="top: 10%; left: 5%; animation-delay: 0s;">🌸</div>
+                <div class="flower" style="top: 20%; right: 5%; animation-delay: 1s;">🪷</div>
+                <div class="flower" style="bottom: 30%; left: 3%; animation-delay: 2s;">🏵️</div>
+                <div class="flower" style="bottom: 20%; right: 5%; animation-delay: 3s;">🌺</div>
+
+                <!-- Header Section -->
+                <div class="text-center mb-12 reveal">
+                    <!-- Swastika -->
+                    <div class="swastika-container mb-6">
+                        <svg class="swastika" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M50 10 V40 H80 M70 30 L80 40 L70 50" stroke="#d4af37" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M90 50 H60 V80 M70 70 L60 80 L50 70" stroke="#d4af37" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M50 90 V60 H20 M30 70 L20 60 L30 50" stroke="#d4af37" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M10 50 H40 V20 M30 30 L40 20 L50 30" stroke="#d4af37" stroke-width="8" stroke-linecap="round"/>
+                            <circle cx="50" cy="50" r="8" fill="#d4af37"/>
+                        </svg>
+                    </div>
+
+                    <!-- Ganesh -->
+                    <div class="ganesh-circle mx-auto mb-8">
+                        🐘
+                    </div>
+
+                    <!-- Mantra -->
+                    <div class="devanagari text-gold-400 text-sm md:text-base leading-relaxed">
+                        <p class="cinzel text-[#d4af37] text-lg mb-2 tracking-widest">|| श्री गणेशाय नमः ||</p>
+                        <p class="text-white/80 text-xs md:text-sm">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ</p>
+                        <p class="text-white/80 text-xs md:text-sm">निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा</p>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <div class="text-center mb-12 reveal">
+                    <p class="cinzel text-[#d4af37] text-xs md:text-sm tracking-[0.3em] uppercase mb-4">Wedding Invitation</p>
+                    <h1 class="title-font text-6xl md:text-8xl gold-text drop-shadow-2xl">Shubh Vivah</h1>
+                    <div class="flex items-center justify-center gap-4 mt-6">
+                        <span class="text-2xl">✨</span>
+                        <span class="cinzel text-[#d4af37] text-sm tracking-widest">CHANDNI & AAYUSH</span>
+                        <span class="text-2xl">✨</span>
+                    </div>
+                </div>
+
+                <!-- Couple Section -->
+                <div class="grid md:grid-cols-2 gap-6 mb-12">
+                    <!-- Bride -->
+                    <div class="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-[#d4af37]/30 text-center reveal hover:border-[#d4af37] transition-all duration-500">
+                        <div class="text-4xl mb-4">👰</div>
+                        <p class="cinzel text-[#d4af37] text-xs tracking-widest uppercase mb-2">The Bride</p>
+                        <h2 class="title-font text-5xl text-white mb-4">Chandni</h2>
+                        <div class="text-white/70 text-sm">
+                            <p class="mb-1">Daughter of</p>
+                            <p class="font-semibold text-white">Smt. Sita Devi</p>
+                            <p class="text-[#d4af37]">&</p>
+                            <p class="font-semibold text-white">Shri Arun Kumar Mishra</p>
+                            <p class="text-xs mt-2 text-white/50">Manpura, Kanti, Muzaffarpur</p>
+                        </div>
+                    </div>
+
+                    <!-- Groom -->
+                    <div class="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-[#d4af37]/30 text-center reveal hover:border-[#d4af37] transition-all duration-500">
+                        <div class="text-4xl mb-4">🤵</div>
+                        <p class="cinzel text-[#d4af37] text-xs tracking-widest uppercase mb-2">The Groom</p>
+                        <h2 class="title-font text-5xl text-white mb-4">Aayush</h2>
+                        <div class="text-white/70 text-sm">
+                            <p class="mb-1">Son of</p>
+                            <p class="font-semibold text-white">Smt. Shyama Singh</p>
+                            <p class="text-[#d4af37]">&</p>
+                            <p class="font-semibold text-white">Shri Sudhir Kumar Singh</p>
+                            <p class="text-xs mt-2 text-white/50">Gokula Rupauli, Pakri, Muzaffarpur</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Section -->
+                <div class="text-center mb-12 reveal">
+                    <div class="inline-block bg-gradient-to-br from-[#d4af37]/20 to-[#8b0000]/40 rounded-2xl p-8 border-2 border-[#d4af37] pulse-gold">
+                        <p class="cinzel text-[#d4af37] text-lg tracking-widest mb-2">FRIDAY</p>
+                        <p class="cinzel text-7xl md:text-8xl font-bold text-white mb-2">01</p>
+                        <p class="cinzel text-[#f4e4bc] text-xl tracking-widest">MAY 2026</p>
+                        <div class="mt-4 pt-4 border-t border-[#d4af37]/30">
+                            <p class="devanagari text-[#d4af37] text-lg">शुभ-विवाह</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Events Timeline -->
+                <div class="mb-12 reveal">
+                    <h3 class="cinzel text-[#d4af37] text-xl text-center tracking-widest mb-8">WEDDING EVENTS</h3>
+
+                    <div class="space-y-4">
+                        <div class="event-card bg-black/20 backdrop-blur-sm rounded-xl p-5 border border-[#d4af37]/20 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="text-center md:text-left">
+                                <p class="devanagari text-white text-lg">फलदान एवं तिलक</p>
+                                <p class="text-white/60 text-sm">Faldaan & Tilak</p>
+                            </div>
+                            <div class="text-center md:text-right">
+                                <p class="cinzel text-[#d4af37] font-semibold">27 April 2026</p>
+                                <p class="text-white/50 text-xs uppercase tracking-wider">Monday</p>
+                            </div>
+                        </div>
+
+                        <div class="event-card bg-black/20 backdrop-blur-sm rounded-xl p-5 border border-[#d4af37]/20 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="text-center md:text-left">
+                                <p class="devanagari text-white text-lg">मंडप</p>
+                                <p class="text-white/60 text-sm">Mandap Ceremony</p>
+                            </div>
+                            <div class="text-center md:text-right">
+                                <p class="cinzel text-[#d4af37] font-semibold">29 April 2026</p>
+                                <p class="text-white/50 text-xs uppercase tracking-wider">Wednesday</p>
+                            </div>
+                        </div>
+
+                        <div class="event-card bg-black/20 backdrop-blur-sm rounded-xl p-5 border border-[#d4af37]/20 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="text-center md:text-left">
+                                <p class="devanagari text-white text-lg">मेहंदी एवं पूजा मटकोर</p>
+                                <p class="text-white/60 text-sm">Mehndi & Puja Matkor</p>
+                            </div>
+                            <div class="text-center md:text-right">
+                                <p class="cinzel text-[#d4af37] font-semibold">30 April 2026</p>
+                                <p class="text-white/50 text-xs uppercase tracking-wider">Thursday</p>
+                            </div>
+                        </div>
+
+                        <div class="event-card bg-gradient-to-r from-[#d4af37]/30 to-[#8b0000]/50 rounded-xl p-5 border-2 border-[#d4af37] flex flex-col md:flex-row items-center justify-between gap-4 transform scale-105">
+                            <div class="text-center md:text-left">
+                                <p class="devanagari text-[#ffd700] text-2xl font-bold">शुभ-विवाह</p>
+                                <p class="text-white/80 text-sm">Wedding Day</p>
+                            </div>
+                            <div class="text-center md:text-right">
+                                <p class="cinzel text-[#ffd700] text-xl font-bold">01 May 2026</p>
+                                <p class="text-white/70 text-xs uppercase tracking-wider">Friday</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Venue -->
+                <div class="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-[#d4af37]/30 text-center mb-12 reveal">
+                    <div class="text-5xl mb-4">🏛️</div>
+                    <p class="cinzel text-[#d4af37] text-lg tracking-widest mb-4">VENUE</p>
+                    <h3 class="text-2xl text-white font-semibold mb-2">Manpura Kanti</h3>
+                    <p class="text-white/70">Muzaffarpur, Bihar</p>
+                    <div class="mt-6 pt-6 border-t border-[#d4af37]/20">
+                        <p class="text-white/60 text-sm italic">All wedding ceremonies will be held at the bride's residence</p>
+                    </div>
+                </div>
+
+                <!-- Footer Message -->
+                <div class="text-center mb-12 reveal">
+                    <div class="max-w-2xl mx-auto">
+                        <p class="text-white/90 text-lg leading-relaxed mb-6">
+                            Dear Family & Friends,
+                        </p>
+                        <p class="text-white/80 leading-relaxed mb-4">
+                            With the divine blessings of <span class="text-[#d4af37]">Lord Ganesha</span> and our elders, 
+                            we cordially invite you to celebrate the sacred union of
+                        </p>
+                        <p class="title-font text-4xl gold-text my-6">Chandni & Aayush</p>
+                        <p class="text-white/80 leading-relaxed">
+                            Your presence and blessings will make this celebration truly complete!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Contacts -->
+                <div class="grid md:grid-cols-2 gap-6 mb-8 reveal">
+                    <div class="text-center p-6 bg-black/20 rounded-xl border border-[#d4af37]/20">
+                        <p class="cinzel text-[#d4af37] text-xs tracking-widest uppercase mb-3">|| Aavahan ||</p>
+                        <p class="text-white font-semibold mb-2">Rishikesh Mishra</p>
+                        <a href="tel:+918210418840" class="inline-flex items-center gap-2 text-[#d4af37] text-lg font-semibold hover:scale-110 transition-transform">
+                            <span>📞</span> 8210418840
+                        </a>
+                    </div>
+                    <div class="text-center p-6 bg-black/20 rounded-xl border border-[#d4af37]/20">
+                        <p class="cinzel text-[#d4af37] text-xs tracking-widest uppercase mb-3">|| Family ||</p>
+                        <p class="text-white font-semibold mb-2">Rahul Mishra, Divyanshu Raj</p>
+                        <p class="text-[#d4af37] text-sm">Yug, Alok & Mishra Family</p>
+                    </div>
+                </div>
+
+                <!-- Footer Names -->
+                <div class="text-center pt-8 border-t border-[#d4af37]/20 reveal">
+                    <p class="cinzel text-[#d4af37] text-sm tracking-[0.3em]">|| Aaradhya, Divyanshu, Ishaan ||</p>
+                </div>
+            </div>
+
+            <!-- Credits -->
+            <div class="text-center mt-8 text-white/40 text-xs">
+                <p>From: Roshan Kumar Mishra | Printed by: Mayur Printing Kanti</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Remove loader
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 2000);
+        });
+
+        // Three.js Background
+        const canvas = document.getElementById('bg-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        // Create particles (representing flowers/petals)
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 150;
+        const posArray = new Float32Array(particlesCount * 3);
+        const colorArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i += 3) {
+            // Positions
+            posArray[i] = (Math.random() - 0.5) * 15;
+            posArray[i+1] = (Math.random() - 0.5) * 15;
+            posArray[i+2] = (Math.random() - 0.5) * 15;
+
+            // Colors (gold and maroon)
+            const isGold = Math.random() > 0.5;
+            colorArray[i] = isGold ? 0.83 : 0.55;     // R
+            colorArray[i+1] = isGold ? 0.69 : 0.0;    // G
+            colorArray[i+2] = isGold ? 0.22 : 0.0;    // B
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 5;
+
+        // Mouse interaction
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Animation loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsedTime = clock.getElapsedTime();
+
+            // Rotate particles
+            particlesMesh.rotation.y = elapsedTime * 0.05;
+            particlesMesh.rotation.x = mouseY * 0.1;
+            particlesMesh.rotation.z = mouseX * 0.1;
+
+            // Float effect
+            particlesMesh.position.y = Math.sin(elapsedTime * 0.2) * 0.2;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // GSAP Scroll Animations
+        gsap.registerPlugin();
+
+        // Reveal animations on scroll
+        const reveals = document.querySelectorAll('.reveal');
+
+        const revealOnScroll = () => {
+            reveals.forEach((element) => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 100;
+
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll(); // Trigger once on load
+
+        // Stagger animation for event cards
+        gsap.from('.event-card', {
+            scrollTrigger: {
+                trigger: '.event-card',
+                start: 'top 80%'
+            },
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: 'power3.out'
+        });
+
+        // Parallax effect for flowers
+        document.addEventListener('mousemove', (e) => {
+            const flowers = document.querySelectorAll('.flower');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+
+            flowers.forEach((flower, index) => {
+                const speed = (index + 1) * 20;
+                flower.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+        });
+
+        // Click sparkle effect
+        document.addEventListener('click', (e) => {
+            const sparkle = document.createElement('div');
+            sparkle.innerHTML = '✨';
+            sparkle.style.position = 'fixed';
+            sparkle.style.left = e.clientX + 'px';
+            sparkle.style.top = e.clientY + 'px';
+            sparkle.style.fontSize = '24px';
+            sparkle.style.pointerEvents = 'none';
+            sparkle.style.zIndex = '9999';
+            sparkle.style.animation = 'fadeOut 1s forwards';
+            document.body.appendChild(sparkle);
+
+            setTimeout(() => sparkle.remove(), 1000);
+        });
+
+        // Add fadeOut keyframes dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                0% { opacity: 1; transform: scale(1); }
+                100% { opacity: 0; transform: scale(1.5) translateY(-30px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
