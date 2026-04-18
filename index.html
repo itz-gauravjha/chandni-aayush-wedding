@@ -2,20 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Chandni & Aayush - Wedding Invitation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="description" content="You are cordially invited to the wedding celebration of Chandni & Aayush - May 1, 2026">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --maroon-dark: #1a0505;
+            --maroon-dark: #0d0205;
             --maroon: #8b0000;
             --maroon-light: #a52a2a;
             --gold: #d4af37;
             --gold-light: #f4e4bc;
             --gold-dark: #b8941f;
+            --gold-glow: rgba(212, 175, 55, 0.4);
         }
 
         * {
@@ -24,286 +25,764 @@
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
             font-family: 'Poppins', sans-serif;
             background: var(--maroon-dark);
-            overflow-x: hidden;
+            overflow: hidden;
             color: white;
-        }
-        /*fdsaf*/
-        /* Three.js Canvas */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ===== THREE.JS CANVAS ===== */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 0;
         }
 
-        /* Loader */
-        .loader {
+        /* ===== AMBIENT LIGHT OVERLAY ===== */
+        .ambient-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2d0a0a 0%, #1a0505 100%);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(139, 0, 0, 0.15) 0%, transparent 70%),
+                radial-gradient(ellipse at 80% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(139, 0, 0, 0.2) 0%, transparent 50%);
+            transition: background 2s ease;
+        }
+
+        /* ===== VIGNETTE ===== */
+        .vignette {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            box-shadow: inset 0 0 150px rgba(0,0,0,0.7);
+        }
+
+        /* ===== WELCOME SCREEN ===== */
+        .welcome-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, #1a0808 0%, #0d0205 60%, #050102 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s;
+            z-index: 10000;
+            cursor: pointer;
+            overflow: hidden;
         }
 
-        .loader.hidden {
-            opacity: 0;
-            visibility: hidden;
+        .welcome-screen.hidden {
+            pointer-events: none;
         }
 
-        .loader-ganesh {
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle, #d4af37 0%, #b8941f 100%);
+        /* Animated rings behind the welcome icon */
+        .welcome-rings {
+            position: absolute;
+            width: 300px; height: 300px;
+        }
+
+        .welcome-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.1);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            animation: loaderPulse 2s infinite;
-            box-shadow: 0 0 60px rgba(212,175,55,0.6);
+            transform: translate(-50%, -50%);
         }
 
-        @keyframes loaderPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(212,175,55,0.6); }
-            50% { transform: scale(1.1); box-shadow: 0 0 100px rgba(212,175,55,0.9); }
+        .welcome-ring:nth-child(1) { width: 180px; height: 180px; animation: ringPulse 4s ease-in-out infinite; }
+        .welcome-ring:nth-child(2) { width: 220px; height: 220px; animation: ringPulse 4s ease-in-out infinite 0.5s; }
+        .welcome-ring:nth-child(3) { width: 260px; height: 260px; animation: ringPulse 4s ease-in-out infinite 1s; }
+        .welcome-ring:nth-child(4) { width: 300px; height: 300px; animation: ringPulse 4s ease-in-out infinite 1.5s; }
+
+        @keyframes ringPulse {
+            0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.05); }
         }
 
-        .loader-text {
-            margin-top: 30px;
-            font-family: 'Cinzel', serif;
-            color: var(--gold);
-            font-size: 18px;
-            letter-spacing: 4px;
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        /* Main Content */
-        .content {
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Glass Card */
-        .glass-card {
-            background: rgba(139, 0, 0, 0.4);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(212, 175, 55, 0.3);
-            border-radius: 30px;
-            box-shadow: 
-                0 25px 50px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-
-        /* Swastika Animation */
-        .swastika-container {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            margin: 0 auto;
-        }
-
-        .swastika {
-            width: 100%;
-            height: 100%;
-            animation: rotateSwastika 10s linear infinite;
-        }
-
-        @keyframes rotateSwastika {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Ganesh Circle */
-        .ganesh-circle {
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle at 30% 30%, #d4af37, #b8941f);
+        .welcome-ganesh {
+            width: 140px; height: 140px;
+            background: radial-gradient(circle at 35% 35%, #f4e4bc, #d4af37, #b8941f);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 70px;
+            box-shadow: 
+                0 0 80px rgba(212,175,55,0.5),
+                0 0 160px rgba(212,175,55,0.2),
+                inset 0 -5px 20px rgba(0,0,0,0.3);
             position: relative;
-            animation: float 3s ease-in-out infinite;
-            box-shadow: 0 20px 60px rgba(212,175,55,0.4);
+            z-index: 2;
+        }
+
+        .welcome-ganesh::before {
+            content: '';
+            position: absolute;
+            top: -15px; left: -15px; right: -15px; bottom: -15px;
+            border: 2px dashed rgba(212,175,55,0.4);
+            border-radius: 50%;
+            animation: spin 15s linear infinite;
+        }
+
+        .welcome-ganesh::after {
+            content: '';
+            position: absolute;
+            top: -25px; left: -25px; right: -25px; bottom: -25px;
+            border: 1px dashed rgba(212,175,55,0.2);
+            border-radius: 50%;
+            animation: spin 25s linear infinite reverse;
+        }
+
+        .welcome-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 30%, #d4af37 60%, #f4e4bc 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 30px;
+            animation: goldShimmerText 3s linear infinite;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes goldShimmerText {
+            to { background-position: 200% center; }
+        }
+
+        .welcome-subtitle {
+            font-family: 'Cinzel', serif;
+            color: rgba(212,175,55,0.6);
+            font-size: 0.8rem;
+            letter-spacing: 8px;
+            margin-top: 10px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-tap {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tap-circle {
+            width: 72px; height: 72px;
+            border: 2px solid rgba(212,175,55,0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #d4af37;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .tap-circle::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(212,175,55,0.2);
+            animation: tapRipple 2s ease-out infinite;
+        }
+
+        @keyframes tapRipple {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .tap-circle:hover {
+            transform: scale(1.15);
+            border-color: rgba(212,175,55,0.9);
+            box-shadow: 0 0 40px rgba(212,175,55,0.3);
+        }
+
+        .tap-text {
+            font-family: 'Cinzel', serif;
+            color: rgba(212,175,55,0.5);
+            font-size: 0.65rem;
+            letter-spacing: 6px;
+            animation: shimmer 2.5s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* ===== SLIDE SYSTEM ===== */
+        .slide-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            padding: 20px;
+            will-change: transform, opacity;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .slide-inner {
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* ===== GLASS CARD - PREMIUM ===== */
+        .glass-card {
+            background: linear-gradient(
+                135deg,
+                rgba(139, 0, 0, 0.3) 0%,
+                rgba(80, 0, 0, 0.25) 50%,
+                rgba(139, 0, 0, 0.3) 100%
+            );
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 28px;
+            box-shadow: 
+                0 30px 80px rgba(0,0,0,0.5),
+                0 0 0 1px rgba(212, 175, 55, 0.15),
+                inset 0 1px 0 rgba(255,255,255,0.08),
+                inset 0 -1px 0 rgba(0,0,0,0.2);
+            padding: 45px 35px;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        /* Animated golden border glow */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border-radius: 30px;
+            background: conic-gradient(
+                from var(--border-angle, 0deg),
+                transparent 0%,
+                rgba(212, 175, 55, 0.5) 10%,
+                transparent 20%,
+                transparent 80%,
+                rgba(212, 175, 55, 0.3) 90%,
+                transparent 100%
+            );
+            z-index: -1;
+            animation: rotateBorder 6s linear infinite;
+        }
+
+        @keyframes rotateBorder {
+            to { --border-angle: 360deg; }
+        }
+
+        /* Fallback for browsers without @property */
+        @supports not (background: conic-gradient(from 0deg, red, blue)) {
+            .glass-card::before {
+                background: linear-gradient(135deg, rgba(212,175,55,0.3), transparent, rgba(212,175,55,0.2));
+            }
+        }
+
+        /* Light sweep effect on card */
+        .glass-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.04),
+                transparent
+            );
+            animation: lightSweep 5s ease-in-out infinite;
+        }
+
+        @keyframes lightSweep {
+            0%, 100% { left: -100%; }
+            50% { left: 150%; }
+        }
+
+        @property --border-angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        /* ===== TYPOGRAPHY ===== */
+        .title-font { font-family: 'Great Vibes', cursive; }
+        .cinzel { font-family: 'Cinzel', serif; }
+        .devanagari { font-family: 'Noto Serif Devanagari', serif; }
+
+        .gold-text {
+            background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 25%, #d4af37 50%, #f4e4bc 75%, #d4af37 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: goldShimmerText 4s linear infinite;
+        }
+
+        /* ===== SWASTIKA ===== */
+        .swastika-container {
+            position: relative;
+            width: 80px; height: 80px;
+            margin: 0 auto;
+        }
+
+        .swastika {
+            width: 100%; height: 100%;
+            animation: rotateSwastika 12s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+        }
+
+        @keyframes rotateSwastika { to { transform: rotate(360deg); } }
+
+        /* ===== GANESH CIRCLE ===== */
+        .ganesh-circle {
+            width: 130px; height: 130px;
+            background: radial-gradient(circle at 30% 30%, #f4e4bc, #d4af37, #b8941f);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            position: relative;
+            animation: floatGanesh 4s ease-in-out infinite;
+            box-shadow: 
+                0 20px 60px rgba(212,175,55,0.4),
+                inset 0 -5px 15px rgba(0,0,0,0.3);
+            margin: 0 auto;
         }
 
         .ganesh-circle::before {
             content: '';
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            border: 3px dashed rgba(212,175,55,0.5);
+            top: -12px; left: -12px; right: -12px; bottom: -12px;
+            border: 2px dashed rgba(212,175,55,0.4);
             border-radius: 50%;
             animation: spin 20s linear infinite;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Title Styles */
-        .title-font {
-            font-family: 'Great Vibes', cursive;
-        }
-
-        .cinzel {
-            font-family: 'Cinzel', serif;
-        }
-
-        .devanagari {
-            font-family: 'Noto Serif Devanagari', serif;
-        }
-
-        /* Gold Gradient Text */
-        .gold-text {
-            background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Flower Decorations */
-        .flower {
+        .ganesh-circle::after {
+            content: '';
             position: absolute;
-            font-size: 40px;
-            opacity: 0.6;
-            animation: flowerFloat 6s ease-in-out infinite;
-            pointer-events: none;
+            top: -22px; left: -22px; right: -22px; bottom: -22px;
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 50%;
+            animation: spin 30s linear infinite reverse;
         }
 
-        @keyframes flowerFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
-            50% { transform: translateY(-20px) rotate(10deg); opacity: 0.8; }
+        @keyframes floatGanesh {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(1deg); }
+            75% { transform: translateY(-4px) rotate(-1deg); }
         }
 
-        /* Event Card Hover */
-        .event-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .event-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(212,175,55,0.2);
-        }
-
-        /* Pulse Animation for Wedding Day */
-        .pulse-gold {
-            animation: pulseGold 2s infinite;
-        }
-
-        @keyframes pulseGold {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.4); }
-            50% { box-shadow: 0 0 0 20px rgba(212,175,55,0); }
-        }
-
-        /* Scroll Reveal */
-        .reveal {
-            opacity: 0;
-            transform: translateY(50px);
-            transition: all 0.8s ease;
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Diya Animation */
-        .diya {
-            animation: diyaFlicker 3s infinite alternate;
-        }
+        /* ===== DIYA ===== */
+        .diya { animation: diyaFlicker 1.5s infinite alternate ease-in-out; }
 
         @keyframes diyaFlicker {
-            0% { filter: brightness(1) drop-shadow(0 0 10px #ff6b35); }
-            100% { filter: brightness(1.2) drop-shadow(0 0 20px #ff6b35); }
+            0% { filter: brightness(1) drop-shadow(0 0 8px #ff6b35); transform: scale(1); }
+            50% { filter: brightness(1.2) drop-shadow(0 0 15px #ff8c55); transform: scale(1.05); }
+            100% { filter: brightness(1.4) drop-shadow(0 0 25px #ff6b35); transform: scale(1.02); }
         }
 
-        /* Border Animation */
-        .animated-border {
+        /* ===== PULSE GOLD ===== */
+        .pulse-gold { animation: pulseGold 2.5s infinite; }
+
+        @keyframes pulseGold {
+            0%, 100% { box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 0 rgba(212,175,55,0.3); }
+            50% { box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 15px rgba(212,175,55,0); }
+        }
+
+        /* ===== EVENT CARD ===== */
+        .event-card {
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             overflow: hidden;
         }
 
-        .animated-border::before {
+        .event-card::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #d4af37, transparent);
-            animation: borderSlide 3s infinite;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.05), transparent);
+            transition: left 0.5s ease;
         }
 
-        @keyframes borderSlide {
-            0% { left: -100%; }
-            100% { left: 100%; }
+        .event-card:hover::after {
+            left: 100%;
         }
 
-        /* Responsive */
+        .event-card:hover {
+            transform: translateX(5px);
+            border-color: rgba(212,175,55,0.4) !important;
+        }
+
+        /* ===== SLIDE ELEMENT ANIMATIONS ===== */
+        .slide-element {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-container {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(212,175,55,0.15);
+        }
+
+        .progress-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(212,175,55,0.2);
+            border: 1px solid rgba(212,175,55,0.3);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-dot.active {
+            background: #d4af37;
+            box-shadow: 0 0 15px rgba(212,175,55,0.8);
+            transform: scale(1.5);
+            width: 20px;
+            border-radius: 10px;
+        }
+
+        .progress-dot.visited {
+            background: rgba(212,175,55,0.5);
+        }
+
+        .progress-dot:hover {
+            transform: scale(1.4);
+            background: rgba(212,175,55,0.6);
+        }
+
+        /* ===== TIMER RING ===== */
+        .timer-ring-container {
+            position: fixed;
+            bottom: 65px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        .timer-ring { width: 36px; height: 36px; }
+        .timer-ring circle { fill: none; stroke-width: 2; }
+        .timer-ring .bg { stroke: rgba(212,175,55,0.1); }
+        .timer-ring .progress {
+            stroke: #d4af37;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: center;
+            transition: stroke-dashoffset 0.1s linear;
+            filter: drop-shadow(0 0 3px rgba(212,175,55,0.5));
+        }
+
+        /* ===== MUSIC TOGGLE ===== */
+        .music-toggle {
+            position: fixed;
+            top: 20px; right: 20px;
+            z-index: 200;
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            background: rgba(20, 5, 5, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .music-toggle:hover {
+            background: rgba(212,175,55,0.2);
+            transform: scale(1.15) rotate(5deg);
+            border-color: rgba(212,175,55,0.6);
+            box-shadow: 0 0 25px rgba(212,175,55,0.2);
+        }
+
+        .music-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 18px;
+        }
+
+        .music-bar {
+            width: 3px;
+            background: linear-gradient(to top, #b8941f, #f4e4bc);
+            border-radius: 2px;
+            animation: musicBar 0.6s ease-in-out infinite alternate;
+        }
+
+        .music-bar:nth-child(1) { height: 6px; animation-delay: 0s; }
+        .music-bar:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+        .music-bar:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+        .music-bar:nth-child(4) { height: 16px; animation-delay: 0.1s; }
+        .music-bar:nth-child(5) { height: 10px; animation-delay: 0.25s; }
+
+        @keyframes musicBar {
+            0% { height: 3px; }
+            100% { height: 18px; }
+        }
+
+        .music-toggle.paused .music-bar { animation-play-state: paused; }
+
+        /* ===== FLOATING PETALS ===== */
+        .petal {
+            position: fixed;
+            opacity: 0;
+            z-index: 5;
+            pointer-events: none;
+            animation: petalFall linear infinite;
+            filter: blur(0.5px);
+        }
+
+        @keyframes petalFall {
+            0% { opacity: 0; transform: translateY(-10vh) rotate(0deg) translateX(0); }
+            8% { opacity: 0.6; }
+            92% { opacity: 0.4; }
+            100% { opacity: 0; transform: translateY(110vh) rotate(720deg) translateX(80px); }
+        }
+
+        /* ===== THANK YOU HEARTS ===== */
+        .thankyou-hearts {
+            position: absolute;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-heart {
+            position: absolute;
+            animation: heartFloat 5s ease-in-out infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes heartFloat {
+            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.2; }
+            33% { transform: translateY(-15px) scale(1.1) rotate(5deg); opacity: 0.5; }
+            66% { transform: translateY(-8px) scale(0.95) rotate(-3deg); opacity: 0.35; }
+        }
+
+        /* ===== PARTICLE BURST (JS-created) ===== */
+        .burst-particle {
+            position: fixed;
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: #d4af37;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ===== TRANSITION OVERLAY ===== */
+        .transition-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 50;
+            pointer-events: none;
+            display: flex;
+        }
+
+        .transition-bar {
+            flex: 1;
+            background: linear-gradient(180deg, rgba(212,175,55,0.8), rgba(139,0,0,0.9));
+            transform: scaleY(0);
+            transform-origin: bottom;
+        }
+
+        /* ===== NAV ARROWS ===== */
+        .nav-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212,175,55,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #d4af37;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0.5;
+        }
+
+        .nav-arrow:hover {
+            opacity: 1;
+            background: rgba(212,175,55,0.15);
+            transform: translateY(-50%) scale(1.15);
+            box-shadow: 0 0 20px rgba(212,175,55,0.2);
+        }
+
+        .nav-arrow.left { left: 12px; }
+        .nav-arrow.right { right: 12px; }
+
+        /* ===== SLIDE COUNTER ===== */
+        .slide-counter {
+            position: fixed;
+            top: 22px; left: 22px;
+            z-index: 100;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            color: rgba(212,175,55,0.4);
+            letter-spacing: 3px;
+        }
+
+        .slide-counter .current-num {
+            font-size: 1.2rem;
+            color: #d4af37;
+            font-weight: 700;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .ganesh-circle {
-                width: 120px;
-                height: 120px;
-                font-size: 50px;
-            }
+            .ganesh-circle { width: 100px; height: 100px; font-size: 45px; }
+            .glass-card { padding: 32px 22px; border-radius: 22px; }
+            .welcome-title { font-size: 2.2rem; }
+            .nav-arrow { width: 36px; height: 36px; font-size: 14px; }
+            .nav-arrow.left { left: 6px; }
+            .nav-arrow.right { right: 6px; }
         }
+
+        @media (max-width: 400px) {
+            .glass-card { padding: 25px 16px; }
+        }
+
+        /* ===== CUSTOM SCROLLBAR (just in case) ===== */
+        ::-webkit-scrollbar { width: 0; }
     </style>
 <base target="_blank">
 </head>
 <body>
+    <!-- Background Music -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="_Dholak_Me_Taal_Hai_Payal_Me_Chan_Chan_Ringtone_(by Fringster.com).mp3" type="audio/mpeg">
+    </audio>
+
     <!-- Three.js Background Canvas -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Loader -->
-    <div class="loader" id="loader">
-        <div class="loader-ganesh">🕉️</div>
-        <div class="loader-text">Loading Blessings...</div>
+    <!-- Ambient Light Overlay -->
+    <div class="ambient-overlay" id="ambientOverlay"></div>
+
+    <!-- Vignette -->
+    <div class="vignette"></div>
+
+    <!-- Transition Overlay (for cinematic wipes) -->
+    <div class="transition-overlay" id="transitionOverlay">
+        <div class="transition-bar"></div>
+        <div class="transition-bar"></div>
+        <div class="transition-bar"></div>
+        <div class="transition-bar"></div>
+        <div class="transition-bar"></div>
+        <div class="transition-bar"></div>
+        <div class="transition-bar"></div>
+        <div class="transition-bar"></div>
     </div>
 
-    <!-- Main Content -->
-    <div class="content min-h-screen py-8 px-4">
-        <div class="max-w-4xl mx-auto">
+    <!-- ===== WELCOME SCREEN ===== -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-rings" style="position:relative;">
+            <div class="welcome-ring"></div>
+            <div class="welcome-ring"></div>
+            <div class="welcome-ring"></div>
+            <div class="welcome-ring"></div>
+        </div>
+        <div class="welcome-ganesh">🕉️</div>
+        <div class="welcome-title">Chandni & Aayush</div>
+        <div class="welcome-subtitle">Wedding Invitation</div>
+        <div class="welcome-tap">
+            <div class="tap-circle">▶</div>
+            <div class="tap-text">TAP TO OPEN</div>
+        </div>
+    </div>
 
-            <!-- Main Card -->
-            <div class="glass-card p-6 md:p-12 relative overflow-hidden">
+    <!-- Music Toggle -->
+    <div class="music-toggle" id="musicToggle" style="display:none;">
+        <div class="music-bars">
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+            <div class="music-bar"></div>
+        </div>
+    </div>
 
-                <!-- Floating Flowers -->
-                <div class="flower" style="top: 10%; left: 5%; animation-delay: 0s;">🌸</div>
-                <div class="flower" style="top: 20%; right: 5%; animation-delay: 1s;">🪷</div>
-                <div class="flower" style="bottom: 30%; left: 3%; animation-delay: 2s;">🏵️</div>
-                <div class="flower" style="bottom: 20%; right: 5%; animation-delay: 3s;">🌺</div>
+    <!-- Slide Counter -->
+    <div class="slide-counter" id="slideCounter" style="display:none;">
+        <span class="current-num" id="slideNum">01</span> / <span id="slideTotal">09</span>
+    </div>
 
-                <!-- Header Section -->
-                <div class="text-center mb-12 reveal">
-                    <!-- Swastika -->
-                    <div class="swastika-container mb-6">
+    <!-- Nav Arrows -->
+    <div class="nav-arrow left" id="navLeft" style="display:none;" title="Previous">❮</div>
+    <div class="nav-arrow right" id="navRight" style="display:none;" title="Next">❯</div>
+
+    <!-- ===== SLIDES ===== -->
+    <div class="slide-container" id="slideContainer" style="display:none;">
+
+        <!-- SLIDE 1: Ganesh & Mantra -->
+        <div class="slide" data-duration="8000" id="slide-0">
+            <div class="slide-inner">
+                <div class="glass-card">
+                    <div class="slide-element swastika-container" style="margin-bottom:20px;">
                         <svg class="swastika" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M50 10 V40 H80 M70 30 L80 40 L70 50" stroke="#d4af37" stroke-width="8" stroke-linecap="round"/>
                             <path d="M90 50 H60 V80 M70 70 L60 80 L50 70" stroke="#d4af37" stroke-width="8" stroke-linecap="round"/>
@@ -312,216 +791,805 @@
                             <circle cx="50" cy="50" r="8" fill="#d4af37"/>
                         </svg>
                     </div>
-
-                    <!-- Ganesh -->
-                    <div class="ganesh-circle mx-auto mb-8">
-                        🐘
+                    <div class="slide-element">
+                        <div class="ganesh-circle" style="margin-bottom:25px;">🐘</div>
                     </div>
-
-                    <!-- Mantra -->
-                    <div class="devanagari text-gold-400 text-sm md:text-base leading-relaxed">
-                        <p class="cinzel text-[#d4af37] text-lg mb-2 tracking-widest">|| श्री गणेशाय नमः ||</p>
-                        <p class="text-white/80 text-xs md:text-sm">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ</p>
-                        <p class="text-white/80 text-xs md:text-sm">निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा</p>
+                    <div class="slide-element">
+                        <p class="cinzel" style="color:#d4af37; font-size:1.1rem; letter-spacing:4px;">|| श्री गणेशाय नमः ||</p>
                     </div>
-                </div>
-
-                <!-- Title -->
-                <div class="text-center mb-12 reveal">
-                    <p class="cinzel text-[#d4af37] text-xs md:text-sm tracking-[0.3em] uppercase mb-4">Wedding Invitation</p>
-                    <h1 class="title-font text-6xl md:text-8xl gold-text drop-shadow-2xl">Shubh Vivah</h1>
-                    <div class="flex items-center justify-center gap-4 mt-6">
-                        <span class="text-2xl">✨</span>
-                        <span class="cinzel text-[#d4af37] text-sm tracking-widest">CHANDNI & AAYUSH</span>
-                        <span class="text-2xl">✨</span>
+                    <div class="slide-element devanagari" style="line-height:2; margin-top:15px;">
+                        <p style="color:rgba(255,255,255,0.8); font-size:0.9rem;">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ</p>
+                        <p style="color:rgba(255,255,255,0.8); font-size:0.9rem;">निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा</p>
                     </div>
-                </div>
-
-                <!-- Couple Section -->
-                <div class="grid md:grid-cols-2 gap-6 mb-12">
-                    <!-- Bride -->
-                    <div class="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-[#d4af37]/30 text-center reveal hover:border-[#d4af37] transition-all duration-500">
-                        <div class="text-4xl mb-4">👰</div>
-                        <p class="cinzel text-[#d4af37] text-xs tracking-widest uppercase mb-2">The Bride</p>
-                        <h2 class="title-font text-5xl text-white mb-4">Chandni</h2>
-                        <div class="text-white/70 text-sm">
-                            <p class="mb-1">Daughter of</p>
-                            <p class="font-semibold text-white">Smt. Sita Devi</p>
-                            <p class="text-[#d4af37]">&</p>
-                            <p class="font-semibold text-white">Shri Arun Kumar Mishra</p>
-                            <p class="text-xs mt-2 text-white/50">Manpura, Kanti, Muzaffarpur</p>
-                        </div>
-                    </div>
-
-                    <!-- Groom -->
-                    <div class="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-[#d4af37]/30 text-center reveal hover:border-[#d4af37] transition-all duration-500">
-                        <div class="text-4xl mb-4">🤵</div>
-                        <p class="cinzel text-[#d4af37] text-xs tracking-widest uppercase mb-2">The Groom</p>
-                        <h2 class="title-font text-5xl text-white mb-4">Aayush</h2>
-                        <div class="text-white/70 text-sm">
-                            <p class="mb-1">Son of</p>
-                            <p class="font-semibold text-white">Smt. Shyama Singh</p>
-                            <p class="text-[#d4af37]">&</p>
-                            <p class="font-semibold text-white">Shri Sudhir Kumar Singh</p>
-                            <p class="text-xs mt-2 text-white/50">Gokula Rupauli, Pakri, Muzaffarpur</p>
+                    <div class="slide-element" style="margin-top:30px;">
+                        <div style="display:flex; justify-content:center; gap:25px; font-size:2.2rem;" class="diya">
+                            🪔🪔
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Date Section -->
-                <div class="text-center mb-12 reveal">
-                    <div class="inline-block bg-gradient-to-br from-[#d4af37]/20 to-[#8b0000]/40 rounded-2xl p-8 border-2 border-[#d4af37] pulse-gold">
-                        <p class="cinzel text-[#d4af37] text-lg tracking-widest mb-2">FRIDAY</p>
-                        <p class="cinzel text-7xl md:text-8xl font-bold text-white mb-2">01</p>
-                        <p class="cinzel text-[#f4e4bc] text-xl tracking-widest">MAY 2026</p>
-                        <div class="mt-4 pt-4 border-t border-[#d4af37]/30">
-                            <p class="devanagari text-[#d4af37] text-lg">शुभ-विवाह</p>
+        <!-- SLIDE 2: Title - Shubh Vivah -->
+        <div class="slide" data-duration="7000" id="slide-1">
+            <div class="slide-inner">
+                <div class="glass-card">
+                    <div class="slide-element">
+                        <p class="cinzel" style="color:#d4af37; font-size:0.75rem; letter-spacing:8px; text-transform:uppercase; margin-bottom:15px;">Wedding Invitation</p>
+                    </div>
+                    <div class="slide-element">
+                        <h1 class="title-font gold-text" style="font-size:4.5rem; line-height:1;" id="shubhVivahTitle">Shubh Vivah</h1>
+                    </div>
+                    <div class="slide-element" style="margin-top:30px;">
+                        <div style="display:flex; align-items:center; justify-content:center; gap:15px;">
+                            <span style="font-size:1.5rem;">✨</span>
+                            <span class="cinzel" style="color:#d4af37; font-size:0.85rem; letter-spacing:6px;">CHANDNI & AAYUSH</span>
+                            <span style="font-size:1.5rem;">✨</span>
+                        </div>
+                    </div>
+                    <div class="slide-element" style="margin-top:25px;">
+                        <div style="width:100px; height:2px; background:linear-gradient(90deg, transparent, #d4af37, transparent); margin:0 auto;"></div>
+                    </div>
+                    <div class="slide-element" style="margin-top:20px;">
+                        <p class="devanagari" style="color:rgba(212,175,55,0.7); font-size:1.1rem;">शुभ विवाह</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Bride -->
+        <div class="slide" data-duration="7000" id="slide-2">
+            <div class="slide-inner">
+                <div class="glass-card">
+                    <div class="slide-element">
+                        <div style="font-size:4rem; margin-bottom:15px; filter: drop-shadow(0 0 20px rgba(255,182,193,0.3));">👰</div>
+                    </div>
+                    <div class="slide-element">
+                        <p class="cinzel" style="color:#d4af37; font-size:0.7rem; letter-spacing:6px; text-transform:uppercase; margin-bottom:8px;">The Bride</p>
+                    </div>
+                    <div class="slide-element">
+                        <h2 class="title-font" style="font-size:4.2rem; color:white; margin-bottom:20px; text-shadow: 0 0 40px rgba(212,175,55,0.3);">Chandni</h2>
+                    </div>
+                    <div class="slide-element" style="color:rgba(255,255,255,0.7); font-size:0.95rem; line-height:2.2;">
+                        <p style="margin-bottom:5px;">Daughter of</p>
+                        <p style="font-weight:600; color:white;">Smt. Sita Devi</p>
+                        <p style="color:#d4af37; font-size:1.3rem;">&</p>
+                        <p style="font-weight:600; color:white;">Shri Arun Kumar Mishra</p>
+                        <p style="font-size:0.75rem; margin-top:12px; color:rgba(255,255,255,0.35); letter-spacing:2px;">Manpura, Kanti, Muzaffarpur</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Groom -->
+        <div class="slide" data-duration="7000" id="slide-3">
+            <div class="slide-inner">
+                <div class="glass-card">
+                    <div class="slide-element">
+                        <div style="font-size:4rem; margin-bottom:15px; filter: drop-shadow(0 0 20px rgba(212,175,55,0.3));">🤵</div>
+                    </div>
+                    <div class="slide-element">
+                        <p class="cinzel" style="color:#d4af37; font-size:0.7rem; letter-spacing:6px; text-transform:uppercase; margin-bottom:8px;">The Groom</p>
+                    </div>
+                    <div class="slide-element">
+                        <h2 class="title-font" style="font-size:4.2rem; color:white; margin-bottom:20px; text-shadow: 0 0 40px rgba(212,175,55,0.3);">Aayush</h2>
+                    </div>
+                    <div class="slide-element" style="color:rgba(255,255,255,0.7); font-size:0.95rem; line-height:2.2;">
+                        <p style="margin-bottom:5px;">Son of</p>
+                        <p style="font-weight:600; color:white;">Smt. Shyama Singh</p>
+                        <p style="color:#d4af37; font-size:1.3rem;">&</p>
+                        <p style="font-weight:600; color:white;">Shri Sudhir Kumar Singh</p>
+                        <p style="font-size:0.75rem; margin-top:12px; color:rgba(255,255,255,0.35); letter-spacing:2px;">Gokula Rupauli, Pakri, Muzaffarpur</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Wedding Date -->
+        <div class="slide" data-duration="7000" id="slide-4">
+            <div class="slide-inner">
+                <div class="glass-card pulse-gold" style="background:linear-gradient(135deg, rgba(212,175,55,0.12), rgba(139,0,0,0.35), rgba(212,175,55,0.08));">
+                    <div class="slide-element">
+                        <p class="cinzel" style="color:#d4af37; font-size:1rem; letter-spacing:8px; margin-bottom:10px;">FRIDAY</p>
+                    </div>
+                    <div class="slide-element">
+                        <p class="cinzel" style="font-size:7rem; font-weight:900; color:white; line-height:1; text-shadow: 0 0 60px rgba(212,175,55,0.3);">01</p>
+                    </div>
+                    <div class="slide-element">
+                        <p class="cinzel" style="color:#f4e4bc; font-size:1.4rem; letter-spacing:8px;">MAY 2026</p>
+                    </div>
+                    <div class="slide-element" style="margin-top:30px; padding-top:25px; border-top:1px solid rgba(212,175,55,0.25);">
+                        <p class="devanagari" style="color:#d4af37; font-size:1.4rem;">शुभ-विवाह</p>
+                    </div>
+                    <div class="slide-element" style="margin-top:15px;">
+                        <div style="display:flex; justify-content:center; gap:18px; font-size:1.6rem;">
+                            <span>🪷</span><span>🪔</span><span>🪷</span>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Events Timeline -->
-                <div class="mb-12 reveal">
-                    <h3 class="cinzel text-[#d4af37] text-xl text-center tracking-widest mb-8">WEDDING EVENTS</h3>
+        <!-- SLIDE 6: Events Timeline -->
+        <div class="slide" data-duration="10000" id="slide-5">
+            <div class="slide-inner">
+                <div class="glass-card" style="padding:35px 22px;">
+                    <div class="slide-element">
+                        <h3 class="cinzel" style="color:#d4af37; font-size:1rem; letter-spacing:6px; margin-bottom:28px;">WEDDING EVENTS</h3>
+                    </div>
 
-                    <div class="space-y-4">
-                        <div class="event-card bg-black/20 backdrop-blur-sm rounded-xl p-5 border border-[#d4af37]/20 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div class="text-center md:text-left">
-                                <p class="devanagari text-white text-lg">फलदान एवं तिलक</p>
-                                <p class="text-white/60 text-sm">Faldaan & Tilak</p>
-                            </div>
-                            <div class="text-center md:text-right">
-                                <p class="cinzel text-[#d4af37] font-semibold">27 April 2026</p>
-                                <p class="text-white/50 text-xs uppercase tracking-wider">Monday</p>
-                            </div>
+                    <div class="slide-element event-card" style="background:rgba(0,0,0,0.25); border-radius:14px; padding:16px 20px; border:1px solid rgba(212,175,55,0.12); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="text-align:left;">
+                            <p class="devanagari" style="color:white; font-size:0.95rem;">फलदान एवं तिलक</p>
+                            <p style="color:rgba(255,255,255,0.45); font-size:0.75rem;">Faldaan & Tilak</p>
                         </div>
-
-                        <div class="event-card bg-black/20 backdrop-blur-sm rounded-xl p-5 border border-[#d4af37]/20 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div class="text-center md:text-left">
-                                <p class="devanagari text-white text-lg">मंडप</p>
-                                <p class="text-white/60 text-sm">Mandap Ceremony</p>
-                            </div>
-                            <div class="text-center md:text-right">
-                                <p class="cinzel text-[#d4af37] font-semibold">29 April 2026</p>
-                                <p class="text-white/50 text-xs uppercase tracking-wider">Wednesday</p>
-                            </div>
+                        <div style="text-align:right;">
+                            <p class="cinzel" style="color:#d4af37; font-size:0.85rem; font-weight:600;">27 April 2026</p>
+                            <p style="color:rgba(255,255,255,0.35); font-size:0.65rem; letter-spacing:2px; text-transform:uppercase;">Monday</p>
                         </div>
+                    </div>
 
-                        <div class="event-card bg-black/20 backdrop-blur-sm rounded-xl p-5 border border-[#d4af37]/20 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div class="text-center md:text-left">
-                                <p class="devanagari text-white text-lg">मेहंदी एवं पूजा मटकोर</p>
-                                <p class="text-white/60 text-sm">Mehndi & Puja Matkor</p>
-                            </div>
-                            <div class="text-center md:text-right">
-                                <p class="cinzel text-[#d4af37] font-semibold">30 April 2026</p>
-                                <p class="text-white/50 text-xs uppercase tracking-wider">Thursday</p>
-                            </div>
+                    <div class="slide-element event-card" style="background:rgba(0,0,0,0.25); border-radius:14px; padding:16px 20px; border:1px solid rgba(212,175,55,0.12); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="text-align:left;">
+                            <p class="devanagari" style="color:white; font-size:0.95rem;">मंडप</p>
+                            <p style="color:rgba(255,255,255,0.45); font-size:0.75rem;">Mandap Ceremony</p>
                         </div>
+                        <div style="text-align:right;">
+                            <p class="cinzel" style="color:#d4af37; font-size:0.85rem; font-weight:600;">29 April 2026</p>
+                            <p style="color:rgba(255,255,255,0.35); font-size:0.65rem; letter-spacing:2px; text-transform:uppercase;">Wednesday</p>
+                        </div>
+                    </div>
 
-                        <div class="event-card bg-gradient-to-r from-[#d4af37]/30 to-[#8b0000]/50 rounded-xl p-5 border-2 border-[#d4af37] flex flex-col md:flex-row items-center justify-between gap-4 transform scale-105">
-                            <div class="text-center md:text-left">
-                                <p class="devanagari text-[#ffd700] text-2xl font-bold">शुभ-विवाह</p>
-                                <p class="text-white/80 text-sm">Wedding Day</p>
-                            </div>
-                            <div class="text-center md:text-right">
-                                <p class="cinzel text-[#ffd700] text-xl font-bold">01 May 2026</p>
-                                <p class="text-white/70 text-xs uppercase tracking-wider">Friday</p>
-                            </div>
+                    <div class="slide-element event-card" style="background:rgba(0,0,0,0.25); border-radius:14px; padding:16px 20px; border:1px solid rgba(212,175,55,0.12); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="text-align:left;">
+                            <p class="devanagari" style="color:white; font-size:0.95rem;">मेहंदी एवं पूजा मटकोर</p>
+                            <p style="color:rgba(255,255,255,0.45); font-size:0.75rem;">Mehndi & Puja Matkor</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <p class="cinzel" style="color:#d4af37; font-size:0.85rem; font-weight:600;">30 April 2026</p>
+                            <p style="color:rgba(255,255,255,0.35); font-size:0.65rem; letter-spacing:2px; text-transform:uppercase;">Thursday</p>
+                        </div>
+                    </div>
+
+                    <div class="slide-element event-card" style="background:linear-gradient(135deg, rgba(212,175,55,0.2), rgba(139,0,0,0.35)); border-radius:14px; padding:18px 20px; border:2px solid rgba(212,175,55,0.6); display:flex; justify-content:space-between; align-items:center;">
+                        <div style="text-align:left;">
+                            <p class="devanagari" style="color:#ffd700; font-size:1.3rem; font-weight:700;">शुभ-विवाह</p>
+                            <p style="color:rgba(255,255,255,0.7); font-size:0.8rem;">Wedding Day 💍</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <p class="cinzel" style="color:#ffd700; font-size:1.1rem; font-weight:700;">01 May 2026</p>
+                            <p style="color:rgba(255,255,255,0.55); font-size:0.65rem; letter-spacing:2px; text-transform:uppercase;">Friday</p>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Venue -->
-                <div class="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-[#d4af37]/30 text-center mb-12 reveal">
-                    <div class="text-5xl mb-4">🏛️</div>
-                    <p class="cinzel text-[#d4af37] text-lg tracking-widest mb-4">VENUE</p>
-                    <h3 class="text-2xl text-white font-semibold mb-2">Manpura Kanti</h3>
-                    <p class="text-white/70">Muzaffarpur, Bihar</p>
-                    <div class="mt-6 pt-6 border-t border-[#d4af37]/20">
-                        <p class="text-white/60 text-sm italic">All wedding ceremonies will be held at the bride's residence</p>
+        <!-- SLIDE 7: Venue -->
+        <div class="slide" data-duration="7000" id="slide-6">
+            <div class="slide-inner">
+                <div class="glass-card">
+                    <div class="slide-element">
+                        <div style="font-size:4.5rem; margin-bottom:15px; filter: drop-shadow(0 0 20px rgba(212,175,55,0.2));">🏛️</div>
+                    </div>
+                    <div class="slide-element">
+                        <p class="cinzel" style="color:#d4af37; font-size:1rem; letter-spacing:6px; margin-bottom:15px;">VENUE</p>
+                    </div>
+                    <div class="slide-element">
+                        <h3 style="font-size:2rem; color:white; font-weight:700; margin-bottom:8px; text-shadow: 0 0 30px rgba(255,255,255,0.1);">Manpura Kanti</h3>
+                        <p style="color:rgba(255,255,255,0.55); font-size:0.95rem;">Muzaffarpur, Bihar</p>
+                    </div>
+                    <div class="slide-element" style="margin-top:28px; padding-top:25px; border-top:1px solid rgba(212,175,55,0.2);">
+                        <p style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-style:italic; line-height:1.8;">All wedding ceremonies will be held<br>at the bride's residence</p>
+                    </div>
+                    <div class="slide-element" style="margin-top:22px;">
+                        <div style="display:flex; justify-content:center; gap:12px; font-size:1.6rem;">
+                            🌸 🪷 🏵️ 🌺
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Footer Message -->
-                <div class="text-center mb-12 reveal">
-                    <div class="max-w-2xl mx-auto">
-                        <p class="text-white/90 text-lg leading-relaxed mb-6">
+        <!-- SLIDE 8: Invitation Message & Contacts -->
+        <div class="slide" data-duration="9000" id="slide-7">
+            <div class="slide-inner">
+                <div class="glass-card">
+                    <div class="slide-element">
+                        <p style="color:rgba(255,255,255,0.9); font-size:1.15rem; line-height:1.8;">
                             Dear Family & Friends,
                         </p>
-                        <p class="text-white/80 leading-relaxed mb-4">
-                            With the divine blessings of <span class="text-[#d4af37]">Lord Ganesha</span> and our elders, 
+                    </div>
+                    <div class="slide-element" style="margin-top:15px;">
+                        <p style="color:rgba(255,255,255,0.7); line-height:1.9; font-size:0.95rem;">
+                            With the divine blessings of <span style="color:#d4af37; font-weight:600;">Lord Ganesha</span> and our elders,
                             we cordially invite you to celebrate the sacred union of
                         </p>
-                        <p class="title-font text-4xl gold-text my-6">Chandni & Aayush</p>
-                        <p class="text-white/80 leading-relaxed">
+                    </div>
+                    <div class="slide-element" style="margin:22px 0;">
+                        <p class="title-font gold-text" style="font-size:2.8rem;">Chandni & Aayush</p>
+                    </div>
+                    <div class="slide-element" style="margin-top:10px;">
+                        <p style="color:rgba(255,255,255,0.7); line-height:1.7; font-size:0.9rem;">
                             Your presence and blessings will make this celebration truly complete!
                         </p>
                     </div>
-                </div>
-
-                <!-- Contacts -->
-                <div class="grid md:grid-cols-2 gap-6 mb-8 reveal">
-                    <div class="text-center p-6 bg-black/20 rounded-xl border border-[#d4af37]/20">
-                        <p class="cinzel text-[#d4af37] text-xs tracking-widest uppercase mb-3">|| Aavahan ||</p>
-                        <p class="text-white font-semibold mb-2">Rishikesh Mishra</p>
-                        <a href="tel:+918210418840" class="inline-flex items-center gap-2 text-[#d4af37] text-lg font-semibold hover:scale-110 transition-transform">
-                            <span>📞</span> 8210418840
-                        </a>
-                    </div>
-                    <div class="text-center p-6 bg-black/20 rounded-xl border border-[#d4af37]/20">
-                        <p class="cinzel text-[#d4af37] text-xs tracking-widest uppercase mb-3">|| Family ||</p>
-                        <p class="text-white font-semibold mb-2">Rahul Mishra, Divyanshu Raj</p>
-                        <p class="text-[#d4af37] text-sm">Yug, Alok & Mishra Family</p>
+                    <div class="slide-element" style="margin-top:28px; padding-top:22px; border-top:1px solid rgba(212,175,55,0.2);">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                            <div style="background:rgba(0,0,0,0.25); padding:16px; border-radius:14px; border:1px solid rgba(212,175,55,0.12); transition: all 0.3s ease;">
+                                <p class="cinzel" style="color:#d4af37; font-size:0.6rem; letter-spacing:3px; margin-bottom:8px;">|| AAVAHAN ||</p>
+                                <p style="color:white; font-size:0.85rem; font-weight:600;">Rishikesh Mishra</p>
+                                <a href="tel:+918210418840" style="color:#d4af37; font-size:0.85rem; font-weight:600; text-decoration:none; display:inline-block; margin-top:4px;">📞 8210418840</a>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.25); padding:16px; border-radius:14px; border:1px solid rgba(212,175,55,0.12); transition: all 0.3s ease;">
+                                <p class="cinzel" style="color:#d4af37; font-size:0.6rem; letter-spacing:3px; margin-bottom:8px;">|| FAMILY ||</p>
+                                <p style="color:white; font-size:0.85rem; font-weight:600;">Rahul Mishra, Divyanshu Raj</p>
+                                <p style="color:#d4af37; font-size:0.75rem; margin-top:4px;">Yug, Alok & Mishra Family</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Footer Names -->
-                <div class="text-center pt-8 border-t border-[#d4af37]/20 reveal">
-                    <p class="cinzel text-[#d4af37] text-sm tracking-[0.3em]">|| Aaradhya, Divyanshu, Ishaan ||</p>
-                </div>
-            </div>
-
-            <!-- Credits -->
-            <div class="text-center mt-8 text-white/40 text-xs">
-                <p>From: Roshan Kumar Mishra | Printed by: Mayur Printing Kanti</p>
             </div>
         </div>
+
+        <!-- SLIDE 9: Thank You - Waiting for You -->
+        <div class="slide" data-duration="0" id="slide-8">
+            <div class="slide-inner" style="position:relative;">
+                <div class="thankyou-hearts" id="thankyouHearts"></div>
+                <div class="glass-card" style="position:relative; overflow:hidden;">
+                    <!-- Decorative corner accents -->
+                    <div style="position:absolute; top:15px; left:15px; width:35px; height:35px; border-top:2px solid #d4af37; border-left:2px solid #d4af37; border-radius:5px 0 0 0; opacity:0.6;"></div>
+                    <div style="position:absolute; top:15px; right:15px; width:35px; height:35px; border-top:2px solid #d4af37; border-right:2px solid #d4af37; border-radius:0 5px 0 0; opacity:0.6;"></div>
+                    <div style="position:absolute; bottom:15px; left:15px; width:35px; height:35px; border-bottom:2px solid #d4af37; border-left:2px solid #d4af37; border-radius:0 0 0 5px; opacity:0.6;"></div>
+                    <div style="position:absolute; bottom:15px; right:15px; width:35px; height:35px; border-bottom:2px solid #d4af37; border-right:2px solid #d4af37; border-radius:0 0 5px 0; opacity:0.6;"></div>
+
+                    <div class="slide-element">
+                        <div style="font-size:3.5rem; margin-bottom:10px;">🙏</div>
+                    </div>
+                    <div class="slide-element">
+                        <h2 class="title-font gold-text" style="font-size:4.2rem; line-height:1.2;">Thank You</h2>
+                    </div>
+                    <div class="slide-element" style="margin-top:15px;">
+                        <div style="width:80px; height:2px; background:linear-gradient(90deg, transparent, #d4af37, transparent); margin:0 auto;"></div>
+                    </div>
+                    <div class="slide-element" style="margin-top:22px;">
+                        <p class="devanagari" style="color:#d4af37; font-size:1.4rem; margin-bottom:10px;">आपकी प्रतीक्षा में...</p>
+                        <p style="color:rgba(255,255,255,0.8); font-size:1.1rem; font-style:italic; line-height:1.6;">We are waiting for you</p>
+                    </div>
+                    <div class="slide-element" style="margin-top:28px;">
+                        <p class="title-font" style="color:rgba(212,175,55,0.6); font-size:2.2rem;">Chandni & Aayush</p>
+                    </div>
+                    <div class="slide-element" style="margin-top:22px;">
+                        <div style="display:flex; justify-content:center; gap:15px; font-size:1.5rem;">
+                            🌸 🪷 💕 🪷 🌸
+                        </div>
+                    </div>
+                    <div class="slide-element" style="margin-top:28px; padding-top:20px; border-top:1px solid rgba(212,175,55,0.2);">
+                        <p class="cinzel" style="color:rgba(212,175,55,0.45); font-size:0.7rem; letter-spacing:4px;">|| Aaradhya, Divyanshu, Ishaan ||</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="progress-container" id="progressContainer" style="display:none;"></div>
+
+    <!-- Timer Ring -->
+    <div class="timer-ring-container" id="timerRingContainer" style="display:none;">
+        <svg class="timer-ring" viewBox="0 0 40 40">
+            <circle class="bg" cx="20" cy="20" r="16"/>
+            <circle class="progress" id="timerProgress" cx="20" cy="20" r="16" 
+                stroke-dasharray="100.53" stroke-dashoffset="0"/>
+        </svg>
     </div>
 
     <script>
-        // Remove loader
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
-            }, 2000);
+        // ===== CONFIGURATION =====
+        const totalSlides = 9;
+        let currentSlide = -1;
+        let slideTimer = null;
+        let timerInterval = null;
+        let musicPlaying = false;
+        let isTransitioning = false;
+
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.5;
+
+        // Transition types for variety
+        const transitionTypes = [
+            'fadeScale',    // 0->1
+            'slideLeft',    // 1->2
+            'fadeScale',    // 2->3
+            'slideRight',   // 3->4
+            'cinematic',    // 4->5
+            'fadeScale',    // 5->6
+            'slideLeft',    // 6->7
+            'cinematic',    // 7->8
+        ];
+
+        // ===== CREATE PROGRESS DOTS =====
+        const progressContainer = document.getElementById('progressContainer');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'progress-dot';
+            dot.dataset.index = i;
+            dot.addEventListener('click', () => goToSlide(i));
+            progressContainer.appendChild(dot);
+        }
+
+        // ===== CREATE FLOATING PETALS =====
+        const petalEmojis = ['🌸', '🪷', '🌺', '✨', '🏵️'];
+        for (let i = 0; i < 15; i++) {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            petal.textContent = petalEmojis[Math.floor(Math.random() * petalEmojis.length)];
+            petal.style.left = Math.random() * 100 + '%';
+            petal.style.animationDuration = (10 + Math.random() * 12) + 's';
+            petal.style.animationDelay = (Math.random() * 15) + 's';
+            petal.style.fontSize = (12 + Math.random() * 16) + 'px';
+            document.body.appendChild(petal);
+        }
+
+        // ===== CREATE THANK YOU HEARTS =====
+        const heartContainer = document.getElementById('thankyouHearts');
+        const heartEmojis = ['💕', '❤️', '💛', '🧡', '💖', '✨'];
+        for (let i = 0; i < 12; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+            heart.style.left = (5 + Math.random() * 90) + '%';
+            heart.style.top = (5 + Math.random() * 90) + '%';
+            heart.style.animationDelay = (Math.random() * 5) + 's';
+            heart.style.animationDuration = (4 + Math.random() * 4) + 's';
+            heart.style.fontSize = (16 + Math.random() * 14) + 'px';
+            heartContainer.appendChild(heart);
+        }
+
+        // ===== PARTICLE BURST EFFECT =====
+        function createParticleBurst(x, y, count = 30) {
+            const colors = ['#d4af37', '#f4e4bc', '#b8941f', '#ffd700', '#fff'];
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'burst-particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.width = (2 + Math.random() * 4) + 'px';
+                particle.style.height = particle.style.width;
+                document.body.appendChild(particle);
+
+                const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+                const velocity = 80 + Math.random() * 200;
+                const destX = Math.cos(angle) * velocity;
+                const destY = Math.sin(angle) * velocity;
+
+                gsap.to(particle, {
+                    x: destX,
+                    y: destY,
+                    opacity: 0,
+                    scale: 0,
+                    duration: 0.8 + Math.random() * 0.6,
+                    ease: 'power3.out',
+                    onComplete: () => particle.remove()
+                });
+            }
+        }
+
+        // ===== WELCOME SCREEN ANIMATION =====
+        // Animate welcome elements on load
+        gsap.from('.welcome-ganesh', {
+            scale: 0,
+            rotation: 180,
+            duration: 1.2,
+            ease: 'elastic.out(1, 0.5)',
+            delay: 0.3
         });
 
-        // Three.js Background
+        gsap.from('.welcome-title', {
+            y: 40,
+            opacity: 0,
+            duration: 1,
+            ease: 'power3.out',
+            delay: 0.8
+        });
+
+        gsap.from('.welcome-subtitle', {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            ease: 'power3.out',
+            delay: 1
+        });
+
+        gsap.from('.welcome-tap', {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            ease: 'power3.out',
+            delay: 1.3
+        });
+
+        // Floating animation for welcome ganesh
+        gsap.to('.welcome-ganesh', {
+            y: -15,
+            duration: 2.5,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut',
+            delay: 1.5
+        });
+
+        // ===== WELCOME => START =====
+        document.getElementById('welcomeScreen').addEventListener('click', () => {
+            // Play music
+            bgMusic.play().then(() => {
+                musicPlaying = true;
+                document.getElementById('musicToggle').style.display = 'flex';
+            }).catch(() => {
+                document.getElementById('musicToggle').style.display = 'flex';
+                document.getElementById('musicToggle').classList.add('paused');
+            });
+
+            // Cinematic exit
+            const welcomeEl = document.getElementById('welcomeScreen');
+
+            // Particle burst from center
+            createParticleBurst(window.innerWidth / 2, window.innerHeight / 2, 50);
+
+            // GSAP exit animation
+            gsap.to('.welcome-ganesh', {
+                scale: 1.5,
+                opacity: 0,
+                y: -50,
+                duration: 0.8,
+                ease: 'power3.in'
+            });
+
+            gsap.to(['.welcome-title', '.welcome-subtitle', '.welcome-tap'], {
+                opacity: 0,
+                y: 30,
+                duration: 0.6,
+                stagger: 0.1,
+                ease: 'power3.in'
+            });
+
+            gsap.to(welcomeEl, {
+                opacity: 0,
+                duration: 1.2,
+                delay: 0.5,
+                ease: 'power2.inOut',
+                onComplete: () => {
+                    welcomeEl.style.display = 'none';
+                }
+            });
+
+            // Show UI elements
+            setTimeout(() => {
+                document.getElementById('slideContainer').style.display = 'block';
+                document.getElementById('progressContainer').style.display = 'flex';
+                document.getElementById('timerRingContainer').style.display = 'block';
+                document.getElementById('slideCounter').style.display = 'block';
+                document.getElementById('navLeft').style.display = 'flex';
+                document.getElementById('navRight').style.display = 'flex';
+
+                // Fade in UI
+                gsap.from('#progressContainer', { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out' });
+                gsap.from('#slideCounter', { opacity: 0, x: -20, duration: 0.8, ease: 'power3.out' });
+                gsap.from('.nav-arrow', { opacity: 0, duration: 0.8, ease: 'power3.out' });
+
+                goToSlide(0);
+            }, 800);
+        });
+
+        // ===== MUSIC TOGGLE =====
+        document.getElementById('musicToggle').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (musicPlaying) {
+                bgMusic.pause();
+                musicPlaying = false;
+                document.getElementById('musicToggle').classList.add('paused');
+            } else {
+                bgMusic.play();
+                musicPlaying = true;
+                document.getElementById('musicToggle').classList.remove('paused');
+            }
+        });
+
+        // ===== NAV ARROWS =====
+        document.getElementById('navLeft').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentSlide > 0) goToSlide(currentSlide - 1);
+        });
+
+        document.getElementById('navRight').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1);
+        });
+
+        // ===== KEYBOARD NAV =====
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1);
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentSlide > 0) goToSlide(currentSlide - 1);
+            }
+        });
+
+        // ===== SLIDE TRANSITION ANIMATIONS =====
+        function animateSlideIn(slideEl, type) {
+            const elements = slideEl.querySelectorAll('.slide-element');
+            const card = slideEl.querySelector('.glass-card');
+
+            // Reset elements
+            gsap.set(elements, { opacity: 0, y: 50, scale: 0.95 });
+
+            switch(type) {
+                case 'fadeScale':
+                    gsap.from(card, {
+                        scale: 0.85,
+                        opacity: 0,
+                        duration: 0.9,
+                        ease: 'power3.out'
+                    });
+                    break;
+
+                case 'slideLeft':
+                    gsap.from(card, {
+                        x: 100,
+                        opacity: 0,
+                        rotateY: 8,
+                        duration: 0.9,
+                        ease: 'power3.out'
+                    });
+                    break;
+
+                case 'slideRight':
+                    gsap.from(card, {
+                        x: -100,
+                        opacity: 0,
+                        rotateY: -8,
+                        duration: 0.9,
+                        ease: 'power3.out'
+                    });
+                    break;
+
+                case 'cinematic':
+                    gsap.from(card, {
+                        scale: 1.1,
+                        opacity: 0,
+                        y: 30,
+                        duration: 1.1,
+                        ease: 'power4.out'
+                    });
+                    break;
+            }
+
+            // Stagger animate elements inside
+            gsap.to(elements, {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.7,
+                stagger: 0.12,
+                ease: 'power3.out',
+                delay: 0.3,
+                onComplete: () => {
+                    isTransitioning = false;
+                }
+            });
+        }
+
+        function animateSlideOut(slideEl, type) {
+            const card = slideEl.querySelector('.glass-card');
+            const elements = slideEl.querySelectorAll('.slide-element');
+
+            switch(type) {
+                case 'fadeScale':
+                    gsap.to(card, {
+                        scale: 0.9,
+                        opacity: 0,
+                        duration: 0.5,
+                        ease: 'power3.in'
+                    });
+                    break;
+
+                case 'slideLeft':
+                    gsap.to(card, {
+                        x: -80,
+                        opacity: 0,
+                        rotateY: -5,
+                        duration: 0.5,
+                        ease: 'power3.in'
+                    });
+                    break;
+
+                case 'slideRight':
+                    gsap.to(card, {
+                        x: 80,
+                        opacity: 0,
+                        rotateY: 5,
+                        duration: 0.5,
+                        ease: 'power3.in'
+                    });
+                    break;
+
+                case 'cinematic':
+                    gsap.to(elements, {
+                        opacity: 0,
+                        y: -20,
+                        stagger: 0.05,
+                        duration: 0.3,
+                        ease: 'power2.in'
+                    });
+                    gsap.to(card, {
+                        scale: 0.95,
+                        opacity: 0,
+                        duration: 0.5,
+                        ease: 'power3.in',
+                        delay: 0.15
+                    });
+                    break;
+            }
+        }
+
+        // ===== SLIDE NAVIGATION =====
+        function goToSlide(index) {
+            if (index === currentSlide || index < 0 || index >= totalSlides || isTransitioning) return;
+            isTransitioning = true;
+
+            // Clear existing timers
+            clearTimeout(slideTimer);
+            clearInterval(timerInterval);
+
+            const transType = transitionTypes[Math.min(index, transitionTypes.length - 1)] || 'fadeScale';
+
+            // Deactivate current slide
+            if (currentSlide >= 0) {
+                const prevSlide = document.getElementById('slide-' + currentSlide);
+                animateSlideOut(prevSlide, transType);
+                setTimeout(() => {
+                    prevSlide.classList.remove('active');
+                    // Reset GSAP transforms
+                    gsap.set(prevSlide.querySelector('.glass-card'), { clearProps: 'all' });
+                    gsap.set(prevSlide.querySelectorAll('.slide-element'), { clearProps: 'all' });
+                }, 600);
+            }
+
+            const prevSlide = currentSlide;
+            currentSlide = index;
+
+            // Update slide counter
+            document.getElementById('slideNum').textContent = String(currentSlide + 1).padStart(2, '0');
+
+            // Update nav arrow visibility
+            document.getElementById('navLeft').style.opacity = currentSlide > 0 ? '' : '0.2';
+            document.getElementById('navRight').style.opacity = currentSlide < totalSlides - 1 ? '' : '0.2';
+
+            // Activate new slide after exit animation
+            const delay = prevSlide >= 0 ? 500 : 0;
+
+            setTimeout(() => {
+                const activeSlide = document.getElementById('slide-' + currentSlide);
+                activeSlide.classList.add('active');
+
+                // Particle burst at center on special slides
+                if (currentSlide === 1 || currentSlide === 4 || currentSlide === 8) {
+                    createParticleBurst(window.innerWidth / 2, window.innerHeight / 2, 25);
+                }
+
+                // Animate entrance
+                animateSlideIn(activeSlide, transType);
+
+                // Update progress dots
+                document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                    dot.classList.remove('active');
+                    if (i < currentSlide) dot.classList.add('visited');
+                    if (i === currentSlide) {
+                        dot.classList.add('active');
+                        // Pop animation on active dot
+                        gsap.from(dot, { scale: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+                    }
+                });
+
+                // Morph ambient overlay
+                morphAmbientOverlay(currentSlide);
+
+                // Get duration for auto-advance
+                const duration = parseInt(activeSlide.dataset.duration);
+                if (duration > 0) {
+                    startTimer(duration);
+                    slideTimer = setTimeout(() => {
+                        goToSlide(currentSlide + 1);
+                    }, duration);
+                } else {
+                    document.getElementById('timerRingContainer').style.display = 'none';
+                }
+            }, delay);
+        }
+
+        // ===== MORPH AMBIENT OVERLAY =====
+        function morphAmbientOverlay(slideIndex) {
+            const overlay = document.getElementById('ambientOverlay');
+            const overlays = [
+                // Slide 0: Spiritual - warm maroon
+                'radial-gradient(ellipse at 50% 40%, rgba(139,0,0,0.2) 0%, transparent 70%)',
+                // Slide 1: Grand - golden center
+                'radial-gradient(ellipse at 50% 50%, rgba(212,175,55,0.12) 0%, transparent 60%)',
+                // Slide 2: Bride - soft pink/rose
+                'radial-gradient(ellipse at 50% 50%, rgba(255,182,193,0.08) 0%, transparent 60%)',
+                // Slide 3: Groom - regal blue-gold
+                'radial-gradient(ellipse at 50% 50%, rgba(212,175,55,0.1) 0%, transparent 60%)',
+                // Slide 4: Date - celebration gold burst
+                'radial-gradient(ellipse at 50% 50%, rgba(255,215,0,0.1) 0%, transparent 50%)',
+                // Slide 5: Events - warm
+                'radial-gradient(ellipse at 30% 60%, rgba(139,0,0,0.15) 0%, transparent 60%)',
+                // Slide 6: Venue - earthy
+                'radial-gradient(ellipse at 50% 60%, rgba(139,69,19,0.08) 0%, transparent 60%)',
+                // Slide 7: Invitation - gold
+                'radial-gradient(ellipse at 50% 50%, rgba(212,175,55,0.08) 0%, transparent 70%)',
+                // Slide 8: Thank you - warm love
+                'radial-gradient(ellipse at 50% 50%, rgba(255,105,180,0.06) 0%, transparent 60%)',
+            ];
+            gsap.to(overlay, {
+                background: overlays[slideIndex] || overlays[0],
+                duration: 1.5,
+                ease: 'power2.inOut'
+            });
+        }
+
+        // ===== TIMER RING =====
+        function startTimer(duration) {
+            const circle = document.getElementById('timerProgress');
+            const circumference = 2 * Math.PI * 16;
+            const startTime = Date.now();
+
+            document.getElementById('timerRingContainer').style.display = 'block';
+
+            clearInterval(timerInterval);
+            circle.style.strokeDashoffset = '0';
+
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                circle.style.strokeDashoffset = circumference * (1 - progress);
+                if (progress >= 1) clearInterval(timerInterval);
+            }, 30);
+        }
+
+        // ===== THREE.JS BACKGROUND (Enhanced) =====
         const canvas = document.getElementById('bg-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // Create particles (representing flowers/petals)
+        // Particles
         const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 150;
+        const particlesCount = 200;
         const posArray = new Float32Array(particlesCount * 3);
         const colorArray = new Float32Array(particlesCount * 3);
+        const sizeArray = new Float32Array(particlesCount);
 
-        for(let i = 0; i < particlesCount * 3; i += 3) {
-            // Positions
-            posArray[i] = (Math.random() - 0.5) * 15;
-            posArray[i+1] = (Math.random() - 0.5) * 15;
-            posArray[i+2] = (Math.random() - 0.5) * 15;
+        for (let i = 0; i < particlesCount; i++) {
+            const i3 = i * 3;
+            posArray[i3] = (Math.random() - 0.5) * 18;
+            posArray[i3 + 1] = (Math.random() - 0.5) * 18;
+            posArray[i3 + 2] = (Math.random() - 0.5) * 18;
 
-            // Colors (gold and maroon)
-            const isGold = Math.random() > 0.5;
-            colorArray[i] = isGold ? 0.83 : 0.55;     // R
-            colorArray[i+1] = isGold ? 0.69 : 0.0;    // G
-            colorArray[i+2] = isGold ? 0.22 : 0.0;    // B
+            const isGold = Math.random() > 0.4;
+            const isBright = Math.random() > 0.7;
+            colorArray[i3] = isGold ? (isBright ? 0.96 : 0.83) : 0.55;
+            colorArray[i3 + 1] = isGold ? (isBright ? 0.89 : 0.69) : 0.0;
+            colorArray[i3 + 2] = isGold ? (isBright ? 0.74 : 0.22) : 0.0;
+
+            sizeArray[i] = 0.03 + Math.random() * 0.05;
         }
 
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
@@ -531,123 +1599,133 @@
             size: 0.05,
             vertexColors: true,
             transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
         });
 
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
-
         camera.position.z = 5;
 
-        // Mouse interaction
-        let mouseX = 0;
-        let mouseY = 0;
+        let mouseX = 0, mouseY = 0;
+        let targetMouseX = 0, targetMouseY = 0;
 
-        document.addEventListener('mousemove', (event) => {
-            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        document.addEventListener('mousemove', (e) => {
+            targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
         });
 
-        // Animation loop
         const clock = new THREE.Clock();
-
         function animate() {
             requestAnimationFrame(animate);
-
             const elapsedTime = clock.getElapsedTime();
 
-            // Rotate particles
-            particlesMesh.rotation.y = elapsedTime * 0.05;
-            particlesMesh.rotation.x = mouseY * 0.1;
-            particlesMesh.rotation.z = mouseX * 0.1;
+            // Smooth mouse follow
+            mouseX += (targetMouseX - mouseX) * 0.05;
+            mouseY += (targetMouseY - mouseY) * 0.05;
 
-            // Float effect
-            particlesMesh.position.y = Math.sin(elapsedTime * 0.2) * 0.2;
+            particlesMesh.rotation.y = elapsedTime * 0.03 + mouseX * 0.15;
+            particlesMesh.rotation.x = mouseY * 0.12;
+            particlesMesh.rotation.z = Math.sin(elapsedTime * 0.1) * 0.05;
+            particlesMesh.position.y = Math.sin(elapsedTime * 0.15) * 0.3;
+
+            // Subtle breathing effect on size
+            particlesMaterial.size = 0.05 + Math.sin(elapsedTime * 0.5) * 0.01;
 
             renderer.render(scene, camera);
         }
-
         animate();
 
-        // Handle resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // GSAP Scroll Animations
-        gsap.registerPlugin();
-
-        // Reveal animations on scroll
-        const reveals = document.querySelectorAll('.reveal');
-
-        const revealOnScroll = () => {
-            reveals.forEach((element) => {
-                const windowHeight = window.innerHeight;
-                const elementTop = element.getBoundingClientRect().top;
-                const elementVisible = 100;
-
-                if (elementTop < windowHeight - elementVisible) {
-                    element.classList.add('active');
-                }
-            });
-        };
-
-        window.addEventListener('scroll', revealOnScroll);
-        revealOnScroll(); // Trigger once on load
-
-        // Stagger animation for event cards
-        gsap.from('.event-card', {
-            scrollTrigger: {
-                trigger: '.event-card',
-                start: 'top 80%'
-            },
-            y: 50,
-            opacity: 0,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: 'power3.out'
-        });
-
-        // Parallax effect for flowers
-        document.addEventListener('mousemove', (e) => {
-            const flowers = document.querySelectorAll('.flower');
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-
-            flowers.forEach((flower, index) => {
-                const speed = (index + 1) * 20;
-                flower.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
-            });
-        });
-
-        // Click sparkle effect
+        // ===== CLICK SPARKLE (enhanced) =====
         document.addEventListener('click', (e) => {
-            const sparkle = document.createElement('div');
-            sparkle.innerHTML = '✨';
-            sparkle.style.position = 'fixed';
-            sparkle.style.left = e.clientX + 'px';
-            sparkle.style.top = e.clientY + 'px';
-            sparkle.style.fontSize = '24px';
-            sparkle.style.pointerEvents = 'none';
-            sparkle.style.zIndex = '9999';
-            sparkle.style.animation = 'fadeOut 1s forwards';
-            document.body.appendChild(sparkle);
+            const sparkleCount = 5;
+            for (let i = 0; i < sparkleCount; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.innerHTML = ['✨', '⭐', '💫'][Math.floor(Math.random() * 3)];
+                sparkle.style.position = 'fixed';
+                sparkle.style.left = (e.clientX + (Math.random() - 0.5) * 40) + 'px';
+                sparkle.style.top = (e.clientY + (Math.random() - 0.5) * 40) + 'px';
+                sparkle.style.fontSize = (14 + Math.random() * 14) + 'px';
+                sparkle.style.pointerEvents = 'none';
+                sparkle.style.zIndex = '9999';
+                document.body.appendChild(sparkle);
 
-            setTimeout(() => sparkle.remove(), 1000);
+                gsap.from(sparkle, {
+                    scale: 0,
+                    duration: 0.2,
+                    ease: 'back.out(3)'
+                });
+
+                gsap.to(sparkle, {
+                    opacity: 0,
+                    scale: 1.8,
+                    y: -50 - Math.random() * 40,
+                    x: (Math.random() - 0.5) * 60,
+                    rotation: (Math.random() - 0.5) * 90,
+                    duration: 0.8 + Math.random() * 0.4,
+                    ease: 'power3.out',
+                    delay: 0.1,
+                    onComplete: () => sparkle.remove()
+                });
+            }
         });
 
-        // Add fadeOut keyframes dynamically
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeOut {
-                0% { opacity: 1; transform: scale(1); }
-                100% { opacity: 0; transform: scale(1.5) translateY(-30px); }
+        // ===== TOUCH SWIPE SUPPORT =====
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].clientX;
+            touchStartY = e.changedTouches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const diffX = e.changedTouches[0].clientX - touchStartX;
+            const diffY = e.changedTouches[0].clientY - touchStartY;
+
+            // Only trigger if horizontal swipe is dominant
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
+                if (diffX < 0 && currentSlide < totalSlides - 1) {
+                    goToSlide(currentSlide + 1); // Swipe left = next
+                } else if (diffX > 0 && currentSlide > 0) {
+                    goToSlide(currentSlide - 1); // Swipe right = prev
+                }
             }
-        `;
-        document.head.appendChild(style);
+        }, { passive: true });
+
+        // ===== PARALLAX ON CARD (mouse-based tilt) =====
+        document.addEventListener('mousemove', (e) => {
+            const activeCard = document.querySelector('.slide.active .glass-card');
+            if (!activeCard) return;
+
+            const rect = activeCard.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const deltaX = (e.clientX - centerX) / rect.width;
+            const deltaY = (e.clientY - centerY) / rect.height;
+
+            gsap.to(activeCard, {
+                rotateY: deltaX * 3,
+                rotateX: -deltaY * 3,
+                duration: 0.6,
+                ease: 'power2.out'
+            });
+        });
+
+        // Reset tilt on mouse leave
+        document.addEventListener('mouseleave', () => {
+            const activeCard = document.querySelector('.slide.active .glass-card');
+            if (activeCard) {
+                gsap.to(activeCard, { rotateY: 0, rotateX: 0, duration: 0.8, ease: 'elastic.out(1, 0.5)' });
+            }
+        });
     </script>
 </body>
 </html>
